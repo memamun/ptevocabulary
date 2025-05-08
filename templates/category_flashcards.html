@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ category_name }} Flashcards - PTE Vocabulary</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="/static/style.css" rel="stylesheet">
+    <style>
+        .flashcard {
+            perspective: 1000px;
+            height: 200px;
+        }
+        .flashcard-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+        .flashcard.flipped .flashcard-inner {
+            transform: rotateY(180deg);
+        }
+        .flashcard-front, .flashcard-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+            text-align: center;
+        }
+        .flashcard-back {
+            transform: rotateY(180deg);
+        }
+        .controls-container {
+            position: fixed;
+            bottom: 1.5rem;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            z-index: 50;
+        }
+        .controls {
+            background-color: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06);
+            border-radius: 9999px;
+            padding: 0.5rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen font-sans">
+    <header class="bg-gradient-to-r from-green-600 to-teal-600 text-white shadow-md">
+        <div class="container mx-auto py-6 px-4">
+            <h1 class="text-3xl font-bold text-center">{{ category_name }} Flashcards</h1>
+            <div class="flex justify-center mt-3 text-green-100">
+                <div class="px-4 py-1 rounded-full bg-white bg-opacity-20">
+                    <span>{{ flashcards|length }} Flashcards</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <nav class="bg-white shadow-sm">
+        <div class="container mx-auto px-4">
+            <div class="flex items-center justify-center h-16">
+                <div class="flex space-x-4">
+                    <a href="/" class="text-gray-700 hover:text-green-600 px-3 py-2 rounded-md text-sm font-medium">Home</a>
+                    <a href="/questions" class="text-gray-700 hover:text-green-600 px-3 py-2 rounded-md text-sm font-medium">All Questions</a>
+                    <a href="/study" class="text-gray-700 hover:text-green-600 px-3 py-2 rounded-md text-sm font-medium">Study Mode</a>
+                    <a href="/flashcards" class="text-green-600 px-3 py-2 rounded-md text-sm font-medium">Flashcards</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container mx-auto px-4 py-8 max-w-5xl">
+        <div class="mb-8 overflow-x-auto">
+            <div class="inline-flex flex-nowrap pb-2">
+                <a href="/flashcards" class="px-3 py-1 bg-gray-200 hover:bg-green-100 text-gray-700 hover:text-green-700 text-sm rounded-full mx-1 whitespace-nowrap">
+                    All Categories
+                </a>
+                {% for category in categories %}
+                <a href="/flashcards?category_id={{ category.id }}" 
+                   class="px-3 py-1 {% if category.id == current_category_id %}bg-green-600 text-white{% else %}bg-gray-200 hover:bg-green-100 text-gray-700 hover:text-green-700{% endif %} text-sm rounded-full mx-1 whitespace-nowrap">
+                    {{ category.display_name }}
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <!-- Study Controls -->
+        <div class="bg-white rounded-lg shadow-md overflow-hidden mb-8">
+            <div class="p-4 border-b border-gray-200">
+                <div class="flex flex-wrap items-center justify-between gap-4">
+                    <div class="flex items-center">
+                        <span class="text-gray-700 font-medium mr-2">Display:</span>
+                        <button id="fullscreenBtn" class="px-3 py-1 bg-green-600 text-white text-sm rounded-lg mr-2">
+                            Fullscreen Mode
+                        </button>
+                        <button id="shuffleBtn" class="px-3 py-1 bg-gray-200 text-gray-700 text-sm rounded-lg">
+                            Shuffle Cards
+                        </button>
+                    </div>
+                    
+                    <div class="flex items-center">
+                        <label for="searchInput" class="text-gray-700 font-medium mr-2">Search:</label>
+                        <input type="text" id="searchInput" placeholder="Type to search..." 
+                            class="px-3 py-1 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% if flashcards|length == 0 %}
+            <div class="text-center py-10">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                </svg>
+                <h3 class="text-xl font-medium text-gray-700 mb-2">No Flashcards Available</h3>
+                <p class="text-gray-500 mb-6">We're working on adding flashcards for this category.</p>
+                <a href="/flashcards" class="px-4 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 inline-flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                    </svg>
+                    Back to All Flashcards
+                </a>
+            </div>
+        {% else %}
+            <!-- Flashcard View Mode -->
+            <div id="fullscreenMode" class="hidden fixed inset-0 bg-gray-100 z-50 flex items-center justify-center">
+                <div id="fullscreenCard" class="flashcard w-4/5 max-w-lg h-64">
+                    <div class="flashcard-inner">
+                        <div class="flashcard-front bg-white rounded-lg shadow-lg border-2 border-green-300">
+                            <div class="text-2xl font-medium text-gray-900">Loading...</div>
+                        </div>
+                        <div class="flashcard-back bg-green-50 rounded-lg shadow-lg border-2 border-green-400">
+                            <div class="text-2xl font-medium text-gray-900">Loading...</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="controls-container">
+                    <div class="controls">
+                        <button id="prevCardBtn" class="p-2 bg-green-600 text-white rounded-full hover:bg-green-700">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                            </svg>
+                        </button>
+                        <button id="flipCardBtn" class="p-2 bg-blue-600 text-white rounded-full hover:bg-blue-700">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                            </svg>
+                        </button>
+                        <button id="nextCardBtn" class="p-2 bg-green-600 text-white rounded-full hover:bg-green-700">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                            </svg>
+                        </button>
+                        <span id="cardCounter" class="px-3 py-1 bg-gray-200 text-gray-700 text-sm rounded-full">1 / {{ flashcards|length }}</span>
+                        <button id="exitFullscreenBtn" class="p-2 bg-red-600 text-white rounded-full hover:bg-red-700">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Grid View -->
+            <div id="gridContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {% for flashcard in flashcards %}
+                    <div class="flashcard flashcard-item" data-front="{{ flashcard.front }}" data-back="{{ flashcard.back }}" onclick="this.classList.toggle('flipped')">
+                        <div class="flashcard-inner">
+                            <div class="flashcard-front bg-white rounded-lg shadow-md border-2 border-green-200">
+                                <div class="text-lg font-medium text-gray-900">{{ flashcard.front }}</div>
+                            </div>
+                            <div class="flashcard-back bg-green-50 rounded-lg shadow-md border-2 border-green-300">
+                                <div class="text-lg font-medium text-gray-900">{{ flashcard.back }}</div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+        
+        <!-- Study tips -->
+        <div class="bg-green-50 rounded-lg p-6 mt-8">
+            <h3 class="text-lg font-semibold text-green-900 mb-3">Study Tips for {{ category_name }}</h3>
+            <ul class="space-y-2 text-sm text-green-800">
+                <li class="flex items-start">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-green-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Try to recall the definition before flipping the card to actively engage your memory.
+                </li>
+                <li class="flex items-start">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-green-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Create sentences using the vocabulary words to reinforce understanding and usage.
+                </li>
+                <li class="flex items-start">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-green-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Use the "Fullscreen Mode" for focused study without distractions.
+                </li>
+            </ul>
+        </div>
+    </main>
+
+    <footer class="bg-gray-800 text-white py-6 mt-12">
+        <div class="container mx-auto px-4 text-center text-gray-400 text-sm">
+            <p>PTE Vocabulary Practice</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Fullscreen mode
+            const fullscreenMode = document.getElementById('fullscreenMode');
+            const fullscreenBtn = document.getElementById('fullscreenBtn');
+            const exitFullscreenBtn = document.getElementById('exitFullscreenBtn');
+            const fullscreenCard = document.getElementById('fullscreenCard');
+            const gridContainer = document.getElementById('gridContainer');
+            const prevCardBtn = document.getElementById('prevCardBtn');
+            const nextCardBtn = document.getElementById('nextCardBtn');
+            const flipCardBtn = document.getElementById('flipCardBtn');
+            const cardCounter = document.getElementById('cardCounter');
+            const searchInput = document.getElementById('searchInput');
+            const shuffleBtn = document.getElementById('shuffleBtn');
+            
+            // Get all flashcards
+            const flashcards = Array.from(document.querySelectorAll('.flashcard-item'));
+            let currentCardIndex = 0;
+            
+            // Enter fullscreen mode
+            fullscreenBtn?.addEventListener('click', function() {
+                if (flashcards.length === 0) return;
+                
+                fullscreenMode.classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+                updateFullscreenCard();
+            });
+            
+            // Exit fullscreen mode
+            exitFullscreenBtn?.addEventListener('click', function() {
+                fullscreenMode.classList.add('hidden');
+                document.body.style.overflow = 'auto';
+            });
+            
+            // Navigate to previous card
+            prevCardBtn?.addEventListener('click', function() {
+                if (currentCardIndex > 0) {
+                    currentCardIndex--;
+                    updateFullscreenCard();
+                }
+            });
+            
+            // Navigate to next card
+            nextCardBtn?.addEventListener('click', function() {
+                if (currentCardIndex < flashcards.length - 1) {
+                    currentCardIndex++;
+                    updateFullscreenCard();
+                }
+            });
+            
+            // Flip the current card
+            flipCardBtn?.addEventListener('click', function() {
+                fullscreenCard.classList.toggle('flipped');
+            });
+            
+            // Update the fullscreen card with current card data
+            function updateFullscreenCard() {
+                if (flashcards.length === 0) return;
+                
+                const currentCard = flashcards[currentCardIndex];
+                const frontContent = currentCard.getAttribute('data-front');
+                const backContent = currentCard.getAttribute('data-back');
+                
+                const frontDiv = fullscreenCard.querySelector('.flashcard-front div');
+                const backDiv = fullscreenCard.querySelector('.flashcard-back div');
+                
+                frontDiv.textContent = frontContent;
+                backDiv.textContent = backContent;
+                
+                // Reset flip state
+                fullscreenCard.classList.remove('flipped');
+                
+                // Update counter
+                cardCounter.textContent = `${currentCardIndex + 1} / ${flashcards.length}`;
+            }
+            
+            // Search functionality
+            searchInput?.addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase();
+                
+                flashcards.forEach(card => {
+                    const frontText = card.getAttribute('data-front').toLowerCase();
+                    const backText = card.getAttribute('data-back').toLowerCase();
+                    
+                    if (frontText.includes(searchTerm) || backText.includes(searchTerm)) {
+                        card.parentElement.style.display = 'block';
+                    } else {
+                        card.parentElement.style.display = 'none';
+                    }
+                });
+            });
+            
+            // Shuffle cards
+            shuffleBtn?.addEventListener('click', function() {
+                // Fisher-Yates shuffle algorithm
+                for (let i = flashcards.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [flashcards[i], flashcards[j]] = [flashcards[j], flashcards[i]];
+                }
+                
+                // Re-append cards in new order
+                flashcards.forEach(card => {
+                    gridContainer.appendChild(card.parentElement);
+                });
+                
+                // Reset current index for fullscreen mode
+                currentCardIndex = 0;
+                if (!fullscreenMode.classList.contains('hidden')) {
+                    updateFullscreenCard();
+                }
+            });
+            
+            // Keyboard navigation for fullscreen mode
+            document.addEventListener('keydown', function(e) {
+                if (fullscreenMode.classList.contains('hidden')) return;
+                
+                switch (e.key) {
+                    case 'ArrowLeft':
+                        if (currentCardIndex > 0) {
+                            currentCardIndex--;
+                            updateFullscreenCard();
+                        }
+                        break;
+                    case 'ArrowRight':
+                        if (currentCardIndex < flashcards.length - 1) {
+                            currentCardIndex++;
+                            updateFullscreenCard();
+                        }
+                        break;
+                    case ' ':
+                        fullscreenCard.classList.toggle('flipped');
+                        break;
+                    case 'Escape':
+                        fullscreenMode.classList.add('hidden');
+                        document.body.style.overflow = 'auto';
+                        break;
+                }
+            });
+        });
+    </script>
+</body>
+</html> 

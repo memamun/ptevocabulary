@@ -1,0 +1,20 @@
+# This file tells Railway that the application inside the Docker container
+# will listen on the port specified (e.g., 8000). Railway will set the $PORT
+# environment variable to this value, and the Dockerfile's CMD should use $PORT.
+[[ports]]
+  port = 8000 # The internal port your application should listen on.
+
+[build]
+builder = "NIXPACKS"
+
+[deploy]
+startCommand = "uvicorn app:app --host 0.0.0.0 --port $PORT"
+healthcheckPath = "/health"
+healthcheckTimeout = 100
+
+[nixpacks]
+features = ["python"]
+
+[[ports]]
+port = 8000
+internal = 8000 

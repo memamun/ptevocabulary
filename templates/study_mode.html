@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Study Mode: {{ category_name }} - PTE Vocabulary</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="/static/style.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50 min-h-screen font-sans">
+    <header class="bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md">
+        <div class="container mx-auto py-6 px-4">
+            <h1 class="text-3xl font-bold text-center">Study Mode: {{ category_name }}</h1>
+            <div class="flex justify-center mt-3 text-indigo-100">
+                <div class="px-4 py-1 rounded-full bg-white bg-opacity-20">
+                    <span>{{ questions|length }} Questions to Study</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <nav class="bg-white shadow-sm">
+        <div class="container mx-auto px-4">
+            <div class="flex items-center justify-center h-16">
+                <div class="flex space-x-4">
+                    <a href="/" class="text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium">Home</a>
+                    <a href="/questions" class="text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium">All Questions</a>
+                    <a href="/study" class="text-indigo-600 px-3 py-2 rounded-md text-sm font-medium">Study Mode</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container mx-auto px-4 py-8 max-w-5xl">
+        <div class="mb-8 overflow-x-auto">
+            <div class="inline-flex flex-nowrap pb-2">
+                <a href="/study" class="px-3 py-1 bg-gray-200 hover:bg-indigo-100 text-gray-700 hover:text-indigo-700 text-sm rounded-full mx-1 whitespace-nowrap">
+                    All Categories
+                </a>
+                {% for category in categories %}
+                <a href="/study?category_id={{ category.id }}" 
+                   class="px-3 py-1 {% if category.id == current_category_id %}bg-indigo-600 text-white{% else %}bg-gray-200 hover:bg-indigo-100 text-gray-700 hover:text-indigo-700{% endif %} text-sm rounded-full mx-1 whitespace-nowrap">
+                    {{ category.display_name }}
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <div class="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div>
+                <h2 class="text-xl font-bold text-gray-800 flex items-center">
+                    <span class="bg-purple-100 text-purple-800 px-3 py-1 rounded-full mr-2 text-sm">Study Mode</span>
+                    {{ category_name }}
+                </h2>
+                <p class="text-gray-600 mt-1">Review all questions with answers and explanations</p>
+            </div>
+            
+            <div class="flex space-x-3">
+                <a href="/questions?category_id={{ current_category_id }}" class="px-4 py-2 bg-gray-200 text-gray-700 text-sm rounded-lg hover:bg-gray-300 inline-flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                    View Questions
+                </a>
+                <a href="/exam/start?category_id={{ current_category_id }}&num_questions=10" class="px-4 py-2 bg-indigo-600 text-white text-sm rounded-lg hover:bg-indigo-700 inline-flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                    </svg>
+                    Take Exam
+                </a>
+            </div>
+        </div>
+
+        <!-- Study Controls -->
+        <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
+            <div class="p-4 border-b border-gray-200">
+                <div class="flex flex-wrap items-center justify-between gap-4">
+                    <div class="flex items-center">
+                        <span class="text-gray-700 font-medium mr-2">Display options:</span>
+                        <button id="showAllBtn" class="px-3 py-1 bg-indigo-600 text-white text-sm rounded-lg mr-2">
+                            Show All
+                        </button>
+                        <button id="hideAnswersBtn" class="px-3 py-1 bg-gray-200 text-gray-700 text-sm rounded-lg">
+                            Hide Answers
+                        </button>
+                    </div>
+                    
+                    <div class="flex items-center">
+                        <label for="searchInput" class="text-gray-700 font-medium mr-2">Search:</label>
+                        <input type="text" id="searchInput" placeholder="Type to search..." 
+                            class="px-3 py-1 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Questions List -->
+        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+            {% if questions|length == 0 %}
+                <p class="p-6 text-gray-500">No questions in this category.</p>
+            {% else %}
+                <ul class="divide-y divide-gray-200" id="questionsList">
+                    {% for question in questions %}
+                        <li class="p-6 hover:bg-gray-50 transition-colors question-item">
+                            <div class="mb-3">
+                                <div class="flex items-start">
+                                    <div class="bg-purple-600 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3 flex-shrink-0 mt-1">
+                                        {{ loop.index }}
+                                    </div>
+                                    <div class="text-gray-900 font-medium">
+                                        {% if question.question_text %}
+                                            {{ question.question_text }}
+                                        {% elif question.word %}
+                                            {{ question.word }}
+                                        {% elif question.sentence %}
+                                            {% if question.italicized_word %}
+                                                {{ question.sentence|replace(question.italicized_word, "<em class='font-semibold'>" + question.italicized_word + "</em>")|safe }}
+                                            {% else %}
+                                                {{ question.sentence }}
+                                            {% endif %}
+                                        {% elif question.idiomatic_expression %}
+                                            {{ question.idiomatic_expression }}
+                                        {% else %}
+                                            Question #{{ question.id }}
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mb-4 ml-11 answer-section">
+                                <div class="p-2 rounded-lg {% if question.correct_answer == 'a' %}bg-green-100 border border-green-300{% else %}bg-gray-100{% endif %}">
+                                    <span class="text-sm text-gray-500">A.</span> {{ question.option_a }}
+                                    {% if question.correct_answer == 'a' %}
+                                        <span class="ml-1 text-xs bg-green-600 text-white px-1.5 py-0.5 rounded-full">Correct</span>
+                                    {% endif %}
+                                </div>
+                                <div class="p-2 rounded-lg {% if question.correct_answer == 'b' %}bg-green-100 border border-green-300{% else %}bg-gray-100{% endif %}">
+                                    <span class="text-sm text-gray-500">B.</span> {{ question.option_b }}
+                                    {% if question.correct_answer == 'b' %}
+                                        <span class="ml-1 text-xs bg-green-600 text-white px-1.5 py-0.5 rounded-full">Correct</span>
+                                    {% endif %}
+                                </div>
+                                <div class="p-2 rounded-lg {% if question.correct_answer == 'c' %}bg-green-100 border border-green-300{% else %}bg-gray-100{% endif %}">
+                                    <span class="text-sm text-gray-500">C.</span> {{ question.option_c }}
+                                    {% if question.correct_answer == 'c' %}
+                                        <span class="ml-1 text-xs bg-green-600 text-white px-1.5 py-0.5 rounded-full">Correct</span>
+                                    {% endif %}
+                                </div>
+                                <div class="p-2 rounded-lg {% if question.correct_answer == 'd' %}bg-green-100 border border-green-300{% else %}bg-gray-100{% endif %}">
+                                    <span class="text-sm text-gray-500">D.</span> {{ question.option_d }}
+                                    {% if question.correct_answer == 'd' %}
+                                        <span class="ml-1 text-xs bg-green-600 text-white px-1.5 py-0.5 rounded-full">Correct</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            {% if question.explanation %}
+                                <div class="mt-2 text-sm text-gray-700 bg-yellow-50 p-3 rounded-lg border-l-4 border-yellow-400 ml-11 explanation-section">
+                                    <div class="font-medium text-yellow-800">Explanation:</div>
+                                    <p>{{ question.explanation }}</p>
+                                </div>
+                            {% endif %}
+
+                            <div class="mt-4 ml-11 pt-3 border-t border-gray-100 flex items-center gap-2 study-tools">
+                                <button class="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded hover:bg-gray-200 toggle-answers">
+                                    <span class="show-text">Show Answer</span>
+                                    <span class="hide-text hidden">Hide Answer</span>
+                                </button>
+                                <button class="px-2 py-1 bg-indigo-100 text-indigo-700 text-xs rounded hover:bg-indigo-200 mark-for-review">
+                                    Mark for Review
+                                </button>
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </div>
+    </main>
+
+    <footer class="bg-gray-800 text-white py-6 mt-12">
+        <div class="container mx-auto px-4 text-center text-gray-400 text-sm">
+            <p>PTE Vocabulary Practice</p>
+        </div>
+    </footer>
+
+    <script>
+        // Study mode functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            // Show/Hide all answers
+            const showAllBtn = document.getElementById('showAllBtn');
+            const hideAnswersBtn = document.getElementById('hideAnswersBtn');
+            const answerSections = document.querySelectorAll('.answer-section, .explanation-section');
+            const toggleButtons = document.querySelectorAll('.toggle-answers');
+            
+            // Initial state: answers visible
+            let answersVisible = true;
+            
+            showAllBtn.addEventListener('click', function() {
+                answerSections.forEach(section => section.classList.remove('hidden'));
+                toggleButtons.forEach(btn => {
+                    btn.querySelector('.show-text').classList.add('hidden');
+                    btn.querySelector('.hide-text').classList.remove('hidden');
+                });
+                showAllBtn.classList.add('bg-indigo-600', 'text-white');
+                showAllBtn.classList.remove('bg-gray-200', 'text-gray-700');
+                hideAnswersBtn.classList.add('bg-gray-200', 'text-gray-700');
+                hideAnswersBtn.classList.remove('bg-indigo-600', 'text-white');
+                answersVisible = true;
+            });
+            
+            hideAnswersBtn.addEventListener('click', function() {
+                answerSections.forEach(section => section.classList.add('hidden'));
+                toggleButtons.forEach(btn => {
+                    btn.querySelector('.show-text').classList.remove('hidden');
+                    btn.querySelector('.hide-text').classList.add('hidden');
+                });
+                hideAnswersBtn.classList.add('bg-indigo-600', 'text-white');
+                hideAnswersBtn.classList.remove('bg-gray-200', 'text-gray-700');
+                showAllBtn.classList.add('bg-gray-200', 'text-gray-700');
+                showAllBtn.classList.remove('bg-indigo-600', 'text-white');
+                answersVisible = false;
+            });
+            
+            // Individual toggle buttons
+            toggleButtons.forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    const questionItem = this.closest('.question-item');
+                    const answerSections = questionItem.querySelectorAll('.answer-section, .explanation-section');
+                    const showText = this.querySelector('.show-text');
+                    const hideText = this.querySelector('.hide-text');
+                    
+                    answerSections.forEach(section => {
+                        section.classList.toggle('hidden');
+                    });
+                    
+                    showText.classList.toggle('hidden');
+                    hideText.classList.toggle('hidden');
+                });
+            });
+            
+            // Mark for review functionality
+            const reviewButtons = document.querySelectorAll('.mark-for-review');
+            reviewButtons.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const questionItem = this.closest('.question-item');
+                    questionItem.classList.toggle('bg-yellow-50');
+                    
+                    if (questionItem.classList.contains('bg-yellow-50')) {
+                        this.textContent = 'Remove Review Mark';
+                        this.classList.add('bg-yellow-100', 'text-yellow-700');
+                        this.classList.remove('bg-indigo-100', 'text-indigo-700');
+                    } else {
+                        this.textContent = 'Mark for Review';
+                        this.classList.add('bg-indigo-100', 'text-indigo-700');
+                        this.classList.remove('bg-yellow-100', 'text-yellow-700');
+                    }
+                });
+            });
+            
+            // Search functionality
+            const searchInput = document.getElementById('searchInput');
+            const questionItems = document.querySelectorAll('.question-item');
+            
+            searchInput.addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase();
+                
+                questionItems.forEach(item => {
+                    const text = item.textContent.toLowerCase();
+                    if (text.includes(searchTerm)) {
+                        item.style.display = 'block';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html> 

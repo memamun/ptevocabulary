@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  pte_app:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    container_name: pte_viewer
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./:/app
+      - ../pte_vocabulary.db:/app/pte_vocabulary.db:ro  # Read-only mount
+    environment:
+      - PYTHONUNBUFFERED=1
+      - LOG_LEVEL=info
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+
+# Docker network configuration
+networks:
+  default:
+    name: pte_network
+    driver: bridge 

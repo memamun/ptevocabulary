@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ category_name }} - PTE Vocabulary Questions</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="/static/style.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50 min-h-screen font-sans">
+    <header class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md">
+        <div class="container mx-auto py-6 px-4">
+            <h1 class="text-3xl font-bold text-center">{{ category_name }}</h1>
+            <div class="flex justify-center mt-3 text-indigo-100">
+                <div class="px-4 py-1 rounded-full bg-white bg-opacity-20">
+                    <span>{{ total_questions }} Questions</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <nav class="bg-white shadow-sm">
+        <div class="container mx-auto px-4">
+            <div class="flex items-center justify-center h-16">
+                <div class="flex space-x-4">
+                    <a href="/" class="text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium">Home</a>
+                    <a href="/questions" class="text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium">All Questions</a>
+                    <span class="text-indigo-600 px-3 py-2 rounded-md text-sm font-medium">{{ category_name }}</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container mx-auto px-4 py-8 max-w-5xl">
+        <div class="mb-8 overflow-x-auto">
+            <div class="inline-flex flex-nowrap pb-2">
+                <a href="/questions" class="px-3 py-1 bg-gray-200 hover:bg-indigo-100 text-gray-700 hover:text-indigo-700 text-sm rounded-full mx-1 whitespace-nowrap">
+                    All Categories
+                </a>
+                {% for category in categories %}
+                <a href="/questions?category_id={{ category.id }}" 
+                   class="px-3 py-1 {% if category.id == current_category_id %}bg-indigo-600 text-white{% else %}bg-gray-200 hover:bg-indigo-100 text-gray-700 hover:text-indigo-700{% endif %} text-sm rounded-full mx-1 whitespace-nowrap">
+                    {{ category.display_name }}
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="mb-6 flex justify-between items-center">
+            <div class="flex items-center">
+                <div class="bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full mr-2 text-sm font-medium">
+                    <span>Category</span>
+                </div>
+                <h2 class="text-xl font-bold text-gray-800">{{ category_name }}</h2>
+            </div>
+            <div class="flex space-x-2">
+                <a href="/exam/start?category_id={{ current_category_id }}&num_questions=10" class="px-4 py-2 bg-indigo-600 text-white text-sm rounded-lg hover:bg-indigo-700 inline-flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                    </svg>
+                    Take Exam (10 Questions)
+                </a>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+            {% if questions|length == 0 %}
+                <p class="p-6 text-gray-500">No questions in this category.</p>
+            {% else %}
+                <ul class="divide-y divide-gray-200">
+                    {% for question in questions %}
+                        <li class="p-6 hover:bg-gray-50 transition-colors">
+                            <div class="mb-3">
+                                <div class="flex items-start">
+                                    <div class="bg-indigo-600 text-white rounded-full w-6 h-6 flex items-center justify-center mr-3 flex-shrink-0 mt-1">
+                                        {{ loop.index }}
+                                    </div>
+                                    <div class="text-gray-900 font-medium">
+                                        {% if question.question_text %}
+                                            {{ question.question_text }}
+                                        {% elif question.word %}
+                                            {{ question.word }}
+                                        {% elif question.sentence %}
+                                            {% if question.italicized_word %}
+                                                {{ question.sentence|replace(question.italicized_word, "<em class='font-semibold'>" + question.italicized_word + "</em>")|safe }}
+                                            {% else %}
+                                                {{ question.sentence }}
+                                            {% endif %}
+                                        {% elif question.idiomatic_expression %}
+                                            {{ question.idiomatic_expression }}
+                                        {% else %}
+                                            Question #{{ question.id }}
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mb-4 ml-9">
+                                <div class="p-2 rounded-lg {% if question.correct_answer == 'a' %}bg-green-100 border border-green-300{% else %}bg-gray-100{% endif %}">
+                                    <span class="text-sm text-gray-500">A.</span> {{ question.option_a }}
+                                </div>
+                                <div class="p-2 rounded-lg {% if question.correct_answer == 'b' %}bg-green-100 border border-green-300{% else %}bg-gray-100{% endif %}">
+                                    <span class="text-sm text-gray-500">B.</span> {{ question.option_b }}
+                                </div>
+                                <div class="p-2 rounded-lg {% if question.correct_answer == 'c' %}bg-green-100 border border-green-300{% else %}bg-gray-100{% endif %}">
+                                    <span class="text-sm text-gray-500">C.</span> {{ question.option_c }}
+                                </div>
+                                <div class="p-2 rounded-lg {% if question.correct_answer == 'd' %}bg-green-100 border border-green-300{% else %}bg-gray-100{% endif %}">
+                                    <span class="text-sm text-gray-500">D.</span> {{ question.option_d }}
+                                </div>
+                            </div>
+                            
+                            {% if question.explanation %}
+                                <div class="mt-2 text-sm text-gray-700 bg-yellow-50 p-3 rounded-lg border-l-4 border-yellow-400 ml-9">
+                                    <div class="font-medium text-yellow-800">Explanation:</div>
+                                    <p>{{ question.explanation }}</p>
+                                </div>
+                            {% endif %}
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </div>
+    </main>
+
+    <footer class="bg-gray-800 text-white py-6 mt-12">
+        <div class="container mx-auto px-4 text-center text-gray-400 text-sm">
+            <p>PTE Vocabulary Question Viewer</p>
+        </div>
+    </footer>
+</body>
+</html> 

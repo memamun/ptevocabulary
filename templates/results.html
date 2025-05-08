@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exam Results: {{ category_name }} - PTE Vocabulary Questions</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="/static/style.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50 min-h-screen font-sans">
+    <header class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md">
+        <div class="container mx-auto py-6 px-4">
+            <h1 class="text-3xl font-bold text-center">{{ category_name }} Exam Results</h1>
+            <div class="flex justify-center mt-3 text-indigo-100">
+                <div class="px-4 py-1 rounded-full bg-white bg-opacity-20">
+                    <span>{{ correct_count }} / {{ total_questions }} Correct ({{ "%.1f"|format(score_percent) }}%)</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <nav class="bg-white shadow-sm">
+        <div class="container mx-auto px-4">
+            <div class="flex items-center justify-center h-16">
+                <div class="flex space-x-4">
+                    <a href="/" class="text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium">Home</a>
+                    <a href="/questions" class="text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium">All Questions</a>
+                    <span class="text-indigo-600 px-3 py-2 rounded-md text-sm font-medium">Exam Results</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container mx-auto px-4 py-8 max-w-4xl">
+        <!-- Score Card -->
+        <div class="bg-white rounded-lg shadow-md overflow-hidden mb-8">
+            <div class="p-6 md:flex items-center justify-between">
+                <div>
+                    <div class="flex items-center mb-2">
+                        <div class="bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full mr-2 text-sm font-medium">
+                            <span>Category: {{ category_name }}</span>
+                        </div>
+                        <div class="bg-{% if score_percent >= 70 %}green-100 text-green-800{% elif score_percent >= 40 %}yellow-100 text-yellow-800{% else %}red-100 text-red-800{% endif %} px-3 py-1 rounded-full text-sm font-medium">
+                            <span>Score: {{ "%.1f"|format(score_percent) }}%</span>
+                        </div>
+                    </div>
+                    <h2 class="text-2xl font-bold text-gray-800">You got {{ correct_count }} of {{ total_questions }} correct</h2>
+                    <p class="text-gray-600 mt-1">
+                        {% if score_percent >= 80 %}Excellent work! 🎉
+                        {% elif score_percent >= 60 %}Good job! 👍
+                        {% elif score_percent >= 40 %}Not bad, keep practicing. 💪
+                        {% else %}Keep studying, you'll improve! 📚
+                        {% endif %}
+                    </p>
+                </div>
+                
+                <div class="mt-4 md:mt-0 flex space-x-3">
+                    <a href="/" class="px-4 py-2 bg-gray-200 text-gray-700 text-sm rounded-lg hover:bg-gray-300 inline-flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                        </svg>
+                        Home
+                    </a>
+                    <a href="/exam/start?category_id={{ questions[0].id }}&num_questions={{ total_questions }}" class="px-4 py-2 bg-indigo-600 text-white text-sm rounded-lg hover:bg-indigo-700 inline-flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                        Try Again
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Results -->
+        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+            <div class="bg-gradient-to-r from-indigo-500 to-indigo-600 px-6 py-4">
+                <h2 class="text-xl font-semibold text-white">Detailed Results</h2>
+            </div>
+            
+            <div class="p-6">
+                <div class="divide-y divide-gray-200">
+                    {% for question in questions %}
+                        <div class="py-6 first:pt-0 last:pb-0">
+                            <div class="mb-3">
+                                <div class="flex items-start">
+                                    <div class="w-8 h-8 rounded-full flex items-center justify-center mr-3 flex-shrink-0 {% if question.is_correct %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-800{% endif %}">
+                                        {{ loop.index }}
+                                    </div>
+                                    <h3 class="text-lg font-medium text-gray-900">
+                                        {% if question.is_correct %}
+                                            <span class="inline-block bg-green-100 text-green-800 text-xs px-2 py-0.5 rounded-full mr-2">Correct</span>
+                                        {% else %}
+                                            <span class="inline-block bg-red-100 text-red-800 text-xs px-2 py-0.5 rounded-full mr-2">Incorrect</span>
+                                        {% endif %}
+                                        Question {{ loop.index }}
+                                    </h3>
+                                </div>
+                            </div>
+                            
+                            <!-- Options -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mb-4 ml-11">
+                                <div class="p-2 rounded-lg {% if question.correct_answer == 'a' %}bg-green-100 text-green-800 border border-green-300{% elif question.user_answer == 'a' and question.correct_answer != 'a' %}bg-red-100 text-red-800 border border-red-300{% else %}bg-gray-100 text-gray-800{% endif %}">
+                                    <span class="text-sm">A.</span> {{ question.option_a }}
+                                </div>
+                                <div class="p-2 rounded-lg {% if question.correct_answer == 'b' %}bg-green-100 text-green-800 border border-green-300{% elif question.user_answer == 'b' and question.correct_answer != 'b' %}bg-red-100 text-red-800 border border-red-300{% else %}bg-gray-100 text-gray-800{% endif %}">
+                                    <span class="text-sm">B.</span> {{ question.option_b }}
+                                </div>
+                                <div class="p-2 rounded-lg {% if question.correct_answer == 'c' %}bg-green-100 text-green-800 border border-green-300{% elif question.user_answer == 'c' and question.correct_answer != 'c' %}bg-red-100 text-red-800 border border-red-300{% else %}bg-gray-100 text-gray-800{% endif %}">
+                                    <span class="text-sm">C.</span> {{ question.option_c }}
+                                </div>
+                                <div class="p-2 rounded-lg {% if question.correct_answer == 'd' %}bg-green-100 text-green-800 border border-green-300{% elif question.user_answer == 'd' and question.correct_answer != 'd' %}bg-red-100 text-red-800 border border-red-300{% else %}bg-gray-100 text-gray-800{% endif %}">
+                                    <span class="text-sm">D.</span> {{ question.option_d }}
+                                </div>
+                            </div>
+                            
+                            <!-- Result Message -->
+                            <div class="mb-4 ml-11">
+                                {% if question.is_correct %}
+                                    <div class="text-sm text-green-700 bg-green-50 p-2 rounded-lg">
+                                        <span class="font-semibold">Correct!</span> You chose the right answer.
+                                    </div>
+                                {% else %}
+                                    <div class="text-sm text-red-700 bg-red-50 p-2 rounded-lg">
+                                        <span class="font-semibold">Incorrect.</span> 
+                                        Your answer: {{ question.user_answer | upper }}.
+                                        Correct answer: {{ question.correct_answer | upper }}.
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Explanation -->
+                            {% if question.explanation %}
+                                <div class="mt-3 text-sm text-gray-700 bg-yellow-50 p-3 rounded-lg border-l-4 border-yellow-400 ml-11">
+                                    <div class="font-medium text-yellow-800">Explanation:</div>
+                                    <p>{{ question.explanation }}</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-gray-800 text-white py-6 mt-12">
+        <div class="container mx-auto px-4 text-center text-gray-400 text-sm">
+            <p>PTE Vocabulary Question Viewer</p>
+        </div>
+    </footer>
+</body>
+</html> 

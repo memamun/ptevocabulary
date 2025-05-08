@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Study Mode - PTE Vocabulary</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="/static/style.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50 min-h-screen font-sans">
+    <header class="bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md">
+        <div class="container mx-auto py-6 px-4">
+            <h1 class="text-3xl font-bold text-center">PTE Vocabulary Study Mode</h1>
+            <p class="text-center mt-3 text-indigo-100 max-w-xl mx-auto">Select a category to study all questions with answers and explanations</p>
+        </div>
+    </header>
+
+    <nav class="bg-white shadow-sm">
+        <div class="container mx-auto px-4">
+            <div class="flex items-center justify-center h-16">
+                <div class="flex space-x-4">
+                    <a href="/" class="text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium">Home</a>
+                    <a href="/questions" class="text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium">All Questions</a>
+                    <a href="/study" class="text-indigo-600 px-3 py-2 rounded-md text-sm font-medium">Study Mode</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container mx-auto px-4 py-8 max-w-5xl">
+        <div class="mb-8 text-center">
+            <h2 class="text-2xl font-bold text-gray-800">Study Mode</h2>
+            <p class="text-gray-600 mt-2">Select a category to study all questions with answers</p>
+        </div>
+        
+        <!-- Study features explanation -->
+        <div class="bg-white rounded-lg shadow-md overflow-hidden mb-8">
+            <div class="p-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">Study Mode Features</h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="flex items-start border border-gray-200 rounded-lg p-4">
+                        <div class="text-purple-600 mr-3 flex-shrink-0">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h4 class="font-medium text-gray-900 mb-1">View All Questions</h4>
+                            <p class="text-sm text-gray-600">See all questions with correct answers highlighted</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-start border border-gray-200 rounded-lg p-4">
+                        <div class="text-purple-600 mr-3 flex-shrink-0">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h4 class="font-medium text-gray-900 mb-1">Search Functionality</h4>
+                            <p class="text-sm text-gray-600">Find specific questions by keyword</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-start border border-gray-200 rounded-lg p-4">
+                        <div class="text-purple-600 mr-3 flex-shrink-0">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h4 class="font-medium text-gray-900 mb-1">Mark for Review</h4>
+                            <p class="text-sm text-gray-600">Flag questions that need additional review</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Category selection -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for category in categories %}
+                <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+                    <div class="h-2 bg-gradient-to-r 
+                        {% if loop.index % 7 == 1 %}from-purple-500 to-indigo-500
+                        {% elif loop.index % 7 == 2 %}from-yellow-500 to-orange-500
+                        {% elif loop.index % 7 == 3 %}from-green-500 to-teal-500
+                        {% elif loop.index % 7 == 4 %}from-blue-500 to-indigo-500
+                        {% elif loop.index % 7 == 5 %}from-red-500 to-pink-500
+                        {% elif loop.index % 7 == 6 %}from-indigo-500 to-purple-500
+                        {% else %}from-pink-500 to-red-500{% endif %}">
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-lg font-semibold text-gray-900">{{ category.display_name }}</h3>
+                        <p class="text-sm text-gray-500 mt-1">
+                            {% if category.question_count %}
+                                {{ category.question_count }} Questions
+                            {% else %}
+                                Available for study
+                            {% endif %}
+                        </p>
+                        
+                        <div class="mt-6">
+                            <a href="/study?category_id={{ category.id }}" class="w-full px-4 py-2 bg-purple-600 text-white text-sm rounded-lg hover:bg-purple-700 inline-flex items-center justify-center transition-colors">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                                </svg>
+                                Study This Category
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Study tips -->
+        <div class="bg-indigo-50 rounded-lg p-6 mt-8">
+            <h3 class="text-lg font-semibold text-indigo-900 mb-3">Study Tips</h3>
+            <ul class="space-y-2 text-sm text-indigo-800">
+                <li class="flex items-start">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-indigo-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Review questions in short, focused sessions of 20-30 minutes for optimal learning.
+                </li>
+                <li class="flex items-start">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-indigo-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Use the "Mark for Review" feature to flag challenging questions for later review.
+                </li>
+                <li class="flex items-start">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-indigo-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    After studying, take a practice exam to test your knowledge and reinforce learning.
+                </li>
+                <li class="flex items-start">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-indigo-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Mix categories in your study sessions to develop a broader vocabulary understanding.
+                </li>
+            </ul>
+        </div>
+    </main>
+
+    <footer class="bg-gray-800 text-white py-6 mt-12">
+        <div class="container mx-auto px-4 text-center text-gray-400 text-sm">
+            <p>PTE Vocabulary Practice</p>
+        </div>
+    </footer>
+</body>
+</html> 
